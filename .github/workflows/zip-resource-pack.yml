@@ -1,0 +1,78 @@
+name: Zip Resource Pack
+
+on:
+  push:
+    branches:
+      - master
+
+# Grant write access to GITHUB_TOKEN. Needed to create releases.
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Files
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            assets
+            pack.mcmeta
+            pack.png
+
+      # Sets the name of the zip file to be created for later use.
+      # [!] Change the name of the final resource pack zip file here if you want to.
+      - name: Set File Name
+        run: |
+          FILE_NAME="resource-pack.zip"
+          echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
+
+      # Zip all files in the current directory, excluding anything starting with ".git"
+      # https://stackoverflow.com/a/76100852
+      - name: Create Zip File
+        env:
+          # Needed to stop the linting warning.
+          # https://github.com/github/vscode-github-actions/issues/222#issuecomment-1933501585
+          FILE_NAME: ${{ env.FILE_NAME }}
+        run: zip -r ../${{ env.FILE_NAME }} . -x "*.git*"
+
+      - name: Generate SHA1 Hash
+        id: sha1
+        env:
+          FILE_NAME: ${{ env.FILE_NAME }} # Needed to stop the linting warning
+        run: |
+          echo "SHA1=$(sha1sum ../${{ env.FILE_NAME }} | awk '{ print $1 }')" >> $GITHUB_ENV
+
+      - name: Get Timestamp
+        id: get_timestamp
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+          format: "YYYY-MM-DD_HH.mm.ss.SSS"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA1: ${{ env.SHA1 }} # Needed to stop the linting warning
+        with:
+          tag_name: ${{ steps.get_timestamp.outputs.time }}
+          release_name: ${{ steps.get_timestamp.outputs.time }}
+          body: |
+            ${{ env.SHA1 }}
+            ---
+            ↑ SHA1 Hash of the zip file. Can be used for Minecraft server resource pack verification.
+            Release of ${{ github.sha }}
+
+      - name: Upload Zip to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILE_NAME: ${{ env.FILE_NAME }} # Needed to stop the linting warning
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ../${{ env.FILE_NAME }}
+          asset_name: ${{ env.FILE_NAME }}
+          asset_content_type: application/zip
