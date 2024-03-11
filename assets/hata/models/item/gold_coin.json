@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/coin"
+    "layer0": "hata:item/gold_coin"
   }
 }
