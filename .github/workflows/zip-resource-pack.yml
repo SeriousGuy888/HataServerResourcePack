@@ -3,7 +3,7 @@ name: Zip Resource Pack
 on:
   push:
     branches:
-      - master
+      - main
 
 # Grant write access to GITHUB_TOKEN. Needed to create releases.
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
