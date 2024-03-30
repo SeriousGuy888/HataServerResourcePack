@@ -15,6 +15,12 @@
         "custom_model_data": 101
       },
       "model": "hata:item/watermelon"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 200
+      },
+      "model": "hata:item/cookie"
     }
   ]
 }
