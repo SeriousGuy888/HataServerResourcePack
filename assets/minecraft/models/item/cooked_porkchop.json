@@ -9,6 +9,12 @@
         "custom_model_data": 100
       },
       "model": "hata:item/green_ham"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8600
+      },
+      "model": "hata:item/wandering_trader_meat"
     }
   ]
 }
